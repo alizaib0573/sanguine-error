@@ -1,5 +1,5 @@
 import { useFrame } from '@react-three/fiber';
-import { useRef,useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import useGame from './useGame'; // Adjust path as per your file structure
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
@@ -33,15 +33,17 @@ export function BlockSpinner({ position = [0, 0, 0] }) {
   const speed = useRef((Math.random() + 0.3) * (Math.random() < 0.5 ? -1 : 1));
 
   useFrame(() => {
-    const time = Date.now() / 1000;
-    const rotation = new THREE.Quaternion();
-    rotation.setFromEuler(new THREE.Euler(0, time * speed.current, 0));
-    obstacle.current.setNextKinematicRotation(rotation);
+    if (obstacle.current) {
+      const time = Date.now() / 1000;
+      const rotation = new THREE.Quaternion();
+      rotation.setFromEuler(new THREE.Euler(0, time * speed.current, 0));
+      obstacle.current.setNextKinematicRotation(rotation);
+    }
   });
 
   return (
     <group position={position}>
-      <mesh geometry={boxGeometry} material={floorMaterial} position={[0, -0.1, 0]} scale={[1000, 0.2, 4]} />
+      <mesh geometry={boxGeometry} material={floorMaterial} position={[0, -0.1, 0]} scale={[4, 0.2, 4]} />
       <RigidBody ref={obstacle} type="kinematicPosition" position={[0, 0.3, 0]} restitution={0.2} friction={0}>
         <mesh geometry={boxGeometry} material={obstacleMaterial} scale={[3.5, 0.3, 0.3]} />
       </RigidBody>
@@ -54,24 +56,34 @@ export function BlockAxe({ position = [0, 0, 0] }) {
   const timeOffset = useRef(Math.random() * Math.PI * 2);
 
   useFrame(() => {
-    const time = Date.now() / 1000;
-    const x = Math.sin(time + timeOffset.current) * 1.25;
-    obstacle.current.setNextKinematicTranslation({ x: position[0] + x, y: position[1] + 0.75, z: position[2] });
+    if (obstacle.current) {
+      const time = Date.now() / 1000;
+      const x = Math.sin(time + timeOffset.current) * 1.25;
+      obstacle.current.setNextKinematicTranslation({ x: position[0] + x, y: position[1] + 0.75, z: position[2] });
+    }
   });
 
   return (
     <group position={position}>
-      <mesh geometry={boxGeometry} material={floorMaterial} position={[0, -0.1, 0]} scale={[1000, 0.2, 4]}  />
+      <mesh geometry={boxGeometry} material={floorMaterial} position={[0, -0.1, 0]} scale={[4, 0.2, 4]} />
       <RigidBody ref={obstacle} type="kinematicPosition" position={[0, 0.3, 0]} restitution={0.2} friction={0}>
-        {/* <mesh geometry={boxGeometry} material={obstacleMaterial} scale={[1.5, 1.5, 0.3]} /> */}
-        
+        <mesh geometry={boxGeometry} material={obstacleMaterial} scale={[1.5, 1.5, 0.3]} />
       </RigidBody>
       <Text3D
-      font={"/Roboto-Bold.ttf"}
-      color={"#ffffff"}
+        font="/font.json"
+        size={1}
+        height={0.5}
+        curveSegments={12}
+        bevelEnabled
+        bevelThickness={0.1}
+        bevelSize={0.05}
+        bevelOffset={0}
+        bevelSegments={5}
+        // position={[1,0.5,1]}
       >
-          
-        </Text3D>
+        Ali Zaib
+        <meshStandardMaterial attach="material" color="#ffffff" />
+      </Text3D>
     </group>
   );
 }
@@ -86,8 +98,6 @@ function Bounds({ length = 1 }) {
 
 export function Level({ count = 5, types = [BlockSpinner, BlockAxe], seed = 0 }) {
   const blocks = Array.from({ length: count }, () => types[Math.floor(Math.random() * types.length)]);
-  
-
 
   return (
     <>
